@@ -1,0 +1,29 @@
+# This file tells Docker what files and directories to ignore
+# when building a Docker image.
+
+# Ignore version control
+.git
+
+# Ignore build artifacts
+_build/
+deps/
+
+# Ignore node and npm artifacts
+node_modules/
+
+# Ignore OS and editor files
+.DS_Store
+*.swp
+*.swo
+
+# Ignore test and development files
+/test/
+.formatter.exs
+
+# Ignore CI/CD and config files
+/.github/
+/fly.toml
+
+# Ignore Docker files to prevent infinite loop
+Dockerfile*
+.dockerignore
