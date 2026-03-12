@@ -16,6 +16,14 @@ defmodule RequestDebuggerWeb.CatchController do
         _ -> nil
       end)
 
+    remote_ip = conn.remote_ip |> :inet.ntoa() |> to_string()
+
+    client_ip =
+      case forwarded_for do
+        nil -> remote_ip
+        value -> value |> String.split(",") |> List.first() |> String.trim()
+      end
+
     request_info = %{
       method: conn.method,
       scheme: to_string(conn.scheme),
@@ -27,7 +35,8 @@ defmodule RequestDebuggerWeb.CatchController do
       body_params: conn.body_params,
       params: Map.drop(params, ["path"]),
       headers: conn.req_headers,
-      remote_ip: conn.remote_ip |> :inet.ntoa() |> to_string(),
+      remote_ip: remote_ip,
+      client_ip: client_ip,
       forwarded_for: forwarded_for,
       raw_body: raw_body,
       formatted_body: formatted_body,

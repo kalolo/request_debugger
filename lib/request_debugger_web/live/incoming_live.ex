@@ -123,10 +123,10 @@ defmodule RequestDebuggerWeb.IncomingLive do
             <h3 class="text-sm font-semibold uppercase tracking-wide opacity-70 mb-2">Client Info</h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
               <div>
-                <span class="opacity-60">IP:</span> <code>{req.remote_ip}</code>
+                <span class="opacity-60">Client IP:</span> <code>{req.client_ip}</code>
               </div>
-              <div :if={req.forwarded_for}>
-                <span class="opacity-60">X-Forwarded-For:</span> <code>{req.forwarded_for}</code>
+              <div>
+                <span class="opacity-60">Remote IP:</span> <code>{req.remote_ip}</code>
               </div>
               <div>
                 <span class="opacity-60">Scheme:</span> <code>{req.scheme}</code>
