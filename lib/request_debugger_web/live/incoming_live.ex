@@ -121,9 +121,12 @@ defmodule RequestDebuggerWeb.IncomingLive do
           <%!-- Client Info --%>
           <div>
             <h3 class="text-sm font-semibold uppercase tracking-wide opacity-70 mb-2">Client Info</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-sm">
               <div>
                 <span class="opacity-60">Client IP:</span> <code>{req.client_ip}</code>
+              </div>
+              <div :if={req.client_ipv4}>
+                <span class="opacity-60">IPv4:</span> <code>{req.client_ipv4}</code>
               </div>
               <div>
                 <span class="opacity-60">Remote IP:</span> <code>{req.remote_ip}</code>

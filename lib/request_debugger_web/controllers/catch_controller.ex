@@ -1,5 +1,6 @@
 defmodule RequestDebuggerWeb.CatchController do
   use RequestDebuggerWeb, :controller
+  import Bitwise
 
   def capture(conn, params) do
     raw_body = conn.private[:raw_body] || ""
@@ -24,6 +25,8 @@ defmodule RequestDebuggerWeb.CatchController do
         value -> value |> String.split(",") |> List.first() |> String.trim()
       end
 
+    client_ipv4 = resolve_ipv4(client_ip)
+
     request_info = %{
       method: conn.method,
       scheme: to_string(conn.scheme),
@@ -37,6 +40,7 @@ defmodule RequestDebuggerWeb.CatchController do
       headers: conn.req_headers,
       remote_ip: remote_ip,
       client_ip: client_ip,
+      client_ipv4: client_ipv4,
       forwarded_for: forwarded_for,
       raw_body: raw_body,
       formatted_body: formatted_body,
@@ -46,5 +50,35 @@ defmodule RequestDebuggerWeb.CatchController do
     RequestDebugger.RequestStore.store(request_info)
 
     json(conn, %{status: "ok"})
+  end
+
+  # If already IPv4, return as-is
+  defp resolve_ipv4(ip) do
+    case :inet.parse_address(String.to_charlist(ip)) do
+      {:ok, {_, _, _, _}} ->
+        ip
+
+      {:ok, {0, 0, 0, 0, 0, 0xFFFF, hi, lo}} ->
+        # IPv4-mapped IPv6 (::ffff:a.b.c.d)
+        "#{hi >>> 8}.#{hi &&& 0xFF}.#{lo >>> 8}.#{lo &&& 0xFF}"
+
+      {:ok, ipv6} ->
+        # Pure IPv6 — reverse-DNS to hostname, then resolve to IPv4
+        resolve_ipv6_to_ipv4(ipv6)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp resolve_ipv6_to_ipv4(ipv6) do
+    with {:ok, {:hostent, hostname, _, _, _, _}} <-
+           :inet_res.gethostbyaddr(ipv6, timeout: 2000),
+         {:ok, {:hostent, _, _, :inet, 4, [ipv4 | _]}} <-
+           :inet_res.getbyname(hostname, :a, 2000) do
+      ipv4 |> :inet.ntoa() |> to_string()
+    else
+      _ -> nil
+    end
   end
 end
