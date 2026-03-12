@@ -73,12 +73,14 @@ defmodule RequestDebuggerWeb.CatchController do
 
   defp resolve_ipv6_to_ipv4(ipv6) do
     with {:ok, {:hostent, hostname, _, _, _, _}} <-
-           :inet_res.gethostbyaddr(ipv6, timeout: 2000),
+           :inet_res.gethostbyaddr(ipv6, 2000),
          {:ok, {:hostent, _, _, :inet, 4, [ipv4 | _]}} <-
            :inet_res.getbyname(hostname, :a, 2000) do
       ipv4 |> :inet.ntoa() |> to_string()
     else
       _ -> nil
     end
+  rescue
+    _ -> nil
   end
 end
